@@ -5,6 +5,8 @@ namespace App\Livewire\Site;
 use App\Events\OrderCreated;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
@@ -17,51 +19,52 @@ class Cart extends Component
     #[On('post-order')]
     public function postOrder($items, $name, $total_price)
     {
-        // dd($items, $name, $total_price);
-        // $data = $this->validate([
-        //     'name' => 'required',
-        //     'items' => 'required|array',
-        //     'total_price' => 'required|numeric',
-        // ]);
-        $order = Order::query()->create([
-            // 'table_id' => Session::get('table_id'),
-            'table_id' => 10,
-            'name' => $name,
-            'total_price' => $total_price,
-        ]);
+        DB::beginTransaction();
 
-        $table = $order->table;
-
-        if ($table->status == 'free') {
-            $table->update([
-                'status' => 'occupied',
-                'session_id' => Str::ulid(),
+        try {
+            $order = Order::query()->create([
+                'table_id' => Session::get('table_id'),
+                'name' => $name,
+                'total_price' => $total_price,
             ]);
-            // Table::query()->where('id', $data['table_id'])->update([
-            //     'status' => 'occupied',
-            //     'session_id' => Str::ulid(),
-            // ]);
-        }
-        // info($table);
 
-        $order->update([
-            'session_id' => $table->session_id,
-        ]);
+            $table = $order->table;
 
-        // info($order);
+            if ($table->status == 'free') {
+                $table->update([
+                    'status' => 'occupied',
+                    'session_id' => Str::ulid(),
+                ]);
+            }
 
-        foreach ($items as $item) {
-            OrderItem::query()->create([
-                'order_id' => $order->id,
-                'menu_item_id' => $item['id'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-                'observation' => $item['observation'],
+            $order->update([
+                'session_id' => $table->session_id,
             ]);
-        }
 
-        broadcast(new OrderCreated)->toOthers();
+            foreach ($items as $item) {
+                OrderItem::query()->create([
+                    'order_id' => $order->id,
+                    'menu_item_id' => $item['id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                    'observation' => $item['observation'],
+                ]);
+            }
+
+            DB::commit();
+
+            broadcast(new OrderCreated)->toOthers();
+
+            return;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Erro ao criar pedido: ' . $e->getMessage());
+
+            return;
+        }
     }
+
     public function render()
     {
         return view('livewire.site.cart');

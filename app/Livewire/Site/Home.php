@@ -14,10 +14,6 @@ class Home extends Component
 
     public function mount()
     {
-        // if (!Session::has('table_id')) {
-        //     return to_route('site.index');
-        // }
-
         $this->categories = Category::query()->with('menuItems')->select('id', 'name')->get();
     }
 

@@ -12,6 +12,24 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        Category::factory(10)->create();
+        // Category::factory(10)->create();
+        $categories = [
+            ['name' => 'Bebidas'],
+            ['name' => 'Sobremesas'],
+            ['name' => 'Pratos Principais'],
+            ['name' => 'Entradas'],
+            ['name' => 'Saladas'],
+            ['name' => 'Sanduíches'],
+            ['name' => 'Massas'],
+            ['name' => 'Pizzas'],
+            ['name' => 'Acompanhamentos'],
+            ['name' => 'Cafés e Chás'],
+        ];
+
+        Category::query()->insert($categories);
+
+        // foreach ($categories as $category) {
+        //     Category::create($category);
+        // }
     }
 }

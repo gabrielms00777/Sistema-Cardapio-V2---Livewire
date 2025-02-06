@@ -10,12 +10,18 @@
     <main
         class="bg-cover flex-1 bg-center bg-[url('https://via.placeholder.com/1920x1080')] flex flex-col justify-center items-center">
         <h1 class="mb-6 text-4xl font-bold text-center">Lanchão do Zé</h1>
-        {{-- @if (session()->has('table_id'))
-            <a href="{{ route('site.home') }}" class="border btn btn-primary">Ir para o cardapio</a>
+        @if (session()->has('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if (session()->has('table_id'))
+            <a href="{{ route('site.home') }}" wire:navigate class="border btn btn-primary">Ir para o cardápio</a>
         @else
-            <p>leia o qrcode </p>
-        @endif --}}
-        <a href="{{ route('site.home') }}" wire:navigate class="border btn btn-primary">Ir para o cardapio</a>
+            <p>Leia o QRCode</p>
+        @endif
+        {{-- <a href="{{ route('site.home') }}" wire:navigate class="border btn btn-primary">Ir para o cardapio</a> --}}
     </main>
 
     <div class="flex items-center justify-center py-3 bg-zinc-300">
