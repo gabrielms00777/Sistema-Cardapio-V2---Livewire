@@ -10,11 +10,15 @@ class TokenController extends Controller
 {
     public function __invoke(Request $request)
     {
-        $table = Table::query()->where('token', $request->token)->firstOrFail(['id']);
+        $table = Table::query()->where('token', $request->token)->select('id')->first();
+
+        if (!$table) {
+            return to_route('site.index');
+        }
 
         session([
             'table_id' => $table->id,
-            'expires_at' => now()->addMinutes(5),
+            'expires_at' => now()->addMinutes(10),
         ]);
 
         return to_route('site.home');
